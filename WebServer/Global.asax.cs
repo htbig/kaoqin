@@ -27,7 +27,7 @@ namespace WebServer
             for (int i = 0; i < users.Length; i++)
             {
                 users[i] = new UserInfoMain(i+1);
-                users[i].btnConnect_Click(ips[i]);
+                users[i].BtnConnect_Click(ips[i]);
                 users[i].StartUpTickJob();
             }
             //GlobalConfiguration.Configure(WebApiConfig.Register);

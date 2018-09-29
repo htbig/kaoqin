@@ -13,7 +13,7 @@ namespace OWIN_SignalR
     {
         static void Main(string[] args)
         {
-            string url = "http://+:6666/";
+            string url = "http://+:6667/";
             WebServer.WebApiApplication.Application_Start();
             using (WebApp.Start<Startup>(url))
             {
