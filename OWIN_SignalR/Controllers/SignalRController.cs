@@ -193,12 +193,17 @@ namespace OWIN_SignalR.Controller
                 string str = Convert.ToString(index);
                 string[] sArray = str.Split(new char[2] { ':', ',' });
                 int id = Convert.ToInt16(sArray[0]);
-                
-                WebServer.WebApiApplication.users[id - 1].BtnGetUserInfo_Click(sArray);
+                string[] user_list = new string[sArray.Length-1];
+                int i = 0;
+                for (i = 0; i < user_list.Length; i++)
+                {
+                    user_list[i] = sArray[i+1];
+                }
+                WebServer.WebApiApplication.users[id - 1].BtnGetUserInfo_Click(user_list);
                 System.Diagnostics.Debug.WriteLine("download user success");
                 Thread.Sleep(1000);
                 int total = WebServer.WebApiApplication.users.Length;
-                int i = 0;
+
                 if (id == 1)
                 {
                     for (i = 1; i < total; i++)
@@ -360,6 +365,48 @@ namespace OWIN_SignalR.Controller
                 };
             }  
         }
-        
+        [HttpPost]
+        public HttpResponseMessage PostUserState(dynamic obj)
+        {
+            int id = 2; //default id is 2:前台
+            string user_id_list = "";
+            try
+            {
+                user_id_list = Convert.ToString(obj.user_id_list);
+                id = Convert.ToInt32(obj.id);  //mathine id 1~9
+                if (obj.user_id_list == null || obj.id == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("need user_id_list and id input parameter");
+                    return new HttpResponseMessage()
+                    {
+                        Content = new StringContent("{\"code\":1,\"msg\":\"need user_id_list and id input parameter\",\"output\":[]}", Encoding.UTF8, "application/json"),
+                    };
+                }
+                if (id > WebServer.WebApiApplication.users.Length)
+                {
+                    System.Diagnostics.Debug.WriteLine("has no machine number");
+                    return new HttpResponseMessage()
+                    {
+                        Content = new StringContent("{\"code\":1,\"msg\":\"has no such machine number\",\"output\":[]}", Encoding.UTF8, "application/json"),
+                    };
+                }
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+                return new HttpResponseMessage()
+                {
+                    Content = new StringContent("{\"code\":1,\"msg\":\"" + e.Message + "\",\"output\":[]}", Encoding.UTF8, "application/json"),
+                };
+            }
+            string[] sArray = user_id_list.Split(',');
+            string data = "";
+            data = WebServer.WebApiApplication.users[id - 1].BtnGetUserInfo_Click(sArray);
+            return new HttpResponseMessage()
+            {
+                Content = new StringContent("{\"code\":0,\"msg\":\"success\",\"output\":"+data+"}", Encoding.UTF8, "application/json"),
+            };
+        }
+
     }
 }

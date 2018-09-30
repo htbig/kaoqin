@@ -25,7 +25,7 @@ namespace UserInfo
         public static string[] names = {"测试", "前台", "研发大办公室门口", "洗手间门口", "货梯门口", "采购", "新租办公区", "生产1", "生产2" };
         //Create Standalone SDK class dynamicly.
         public zkemkeeper.CZKEMClass axCZKEM1 = new zkemkeeper.CZKEMClass();
-        private string logPath = "D:\\kaoqin\\WebServer\\";/*"C:\\ustar\\WebServer\\";*/
+        private string logPath = "D:\\kaoqin\\WebServer-api\\";/*"C:\\ustar\\WebServer-api\\";*/
 
         /*************************************************************************************************
         * Before you refer to this demo,we strongly suggest you read the development manual deeply first.*
@@ -131,7 +131,7 @@ namespace UserInfo
             string S = "";
             string S_tmp = "";//for figer templates
             S = "工号," + "姓名," + "指纹索引," + "指纹序列," + "等级," + "密码," + "使能," + "标记," + "人脸索引," + "人脸序列," + "人脸字节数," + "卡号";
-            FileStream fs = new FileStream(logPath +"userInfo.csv", FileMode.OpenOrCreate);
+            FileStream fs = new FileStream(logPath +"userInfo.csv", FileMode.Create);
             StreamWriter sw = new StreamWriter(fs);
             sw.WriteLine(S);
             bool bHasFg = false;
@@ -443,6 +443,7 @@ namespace UserInfo
                 return;
             }
             int idwErrorCode = 0;
+            axCZKEM1.EnableDevice(iMachineNumber, false);
             if (axCZKEM1.SSR_DeleteEnrollData(iMachineNumber, userId, 12)) //12 means delete user info
             {
                 axCZKEM1.RefreshData(iMachineNumber);//the data in the device should be refreshed
@@ -453,6 +454,7 @@ namespace UserInfo
                 axCZKEM1.GetLastError(ref idwErrorCode);
                 System.Diagnostics.Debug.WriteLine("Operation failed,ErrorCode=" + idwErrorCode.ToString());
             }
+            axCZKEM1.EnableDevice(iMachineNumber, true);
         }
 
         //Clear all the administrator privilege(not clear the administrators themselves)
@@ -669,13 +671,14 @@ namespace UserInfo
         //    Cursor = Cursors.Default;
         //}
         //Download specified user's info
-        public void BtnGetUserInfo_Click(string[] users_id)
+        public string BtnGetUserInfo_Click(string[] users_id)
         {
             if (bIsConnected == false)
             {
                 System.Console.Write("Please connect the device first!", "Error");
-                return;
+                return "[]";
             }
+            string data = "[";
             //int idwErrorCode = 0;
             string sdwEnrollNumber = "";
             string sName = "";
@@ -701,27 +704,33 @@ namespace UserInfo
             int iFlag = 0;
             int i = 0;
             bool ret = false;
-            for (i=0; i< users_id.Length -1; i++)
+            for (i=0; i< users_id.Length; i++)
             {
-                sdwEnrollNumber = users_id[i+1];
+                sdwEnrollNumber = users_id[i];
                 //axCZKEM1.EnableDevice(iMachineNumber, false);
                 ret = axCZKEM1.SSR_GetUserInfo(iMachineNumber, sdwEnrollNumber, out sName, out sPassword, out iPrivilege, out bEnabled);
                 if (ret == false)
+                {
+                    data += "{},";
                     continue;
+                } 
                 axCZKEM1.GetStrCardNumber(out sCardnumber);
+                data += "{\"UserId\":\"" + sdwEnrollNumber + "\",\"Name\":\"" + sName + "\",\"Cardnumber\":" + sCardnumber;
                 for (idwFingerIndex = 0; idwFingerIndex < 10; idwFingerIndex++)
                 {
                     if (axCZKEM1.GetUserTmpExStr(iMachineNumber, sdwEnrollNumber, idwFingerIndex, out iFlag, out sTmpData, out iTmpLength))//get the corresponding templates string and length from the memory
                     {
                         if (iFlag == 0)
-                            continue;
+                            continue;                      
                         if (bHasFg == true)
                         {
+                            data += ",\"FingerIndex2\":" + idwFingerIndex.ToString();
                             bHasFg_tmp = true;
                             S_tmp = sdwEnrollNumber + "," + sName + "," + idwFingerIndex + "," + sTmpData + "," + iPrivilege + "," + sPassword + "," + bEnabled + "," + iFlag;
                         }
                         else
                         {
+                            data += ",\"FingerIndex1\":" + idwFingerIndex.ToString();
                             bHasFg = true;
                             S = sdwEnrollNumber + "," + sName + "," + idwFingerIndex + "," + sTmpData + "," + iPrivilege + "," + sPassword + "," + bEnabled + "," + iFlag;
                         }
@@ -731,6 +740,7 @@ namespace UserInfo
                 if (axCZKEM1.GetUserFace(iMachineNumber, sdwEnrollNumber, iFaceIndex, ref sTmpFaceData[0], ref iFaceLength))
                 //if (axCZKEM1.GetUserFaceStr(iMachineNumber, sdwEnrollNumber, iFaceIndex, ref sFaceData, ref iFaceLength))
                 {
+                    data += ",\"HasFace\":true";
                     if (bHasFg == false)
                     {
                         S = sdwEnrollNumber + "," + sName + "," + "" + "," + "" + "," + iPrivilege + "," + sPassword + "," + bEnabled + "," + iFlag;
@@ -766,6 +776,7 @@ namespace UserInfo
                     }
                     S = S + "," + sHexNumner;
                 }
+                data += "},";
                 sw.WriteLine(S);
                 if (bHasFg_tmp == true)
                 {
@@ -775,8 +786,14 @@ namespace UserInfo
                 bHasFg = false;
                 bHasFc = false;
             }
+            if (data.Length > 1)
+            {
+                data = data.Substring(0, (data.Length - 1));
+            }
+            data += "]";
             sw.Close();
             fs.Close();
+            return data;
             //axCZKEM1.EnableDevice(iMachineNumber, true);
         }
         //add by Darcy on Nov.23 2009
