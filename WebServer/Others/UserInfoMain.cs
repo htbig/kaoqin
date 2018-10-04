@@ -146,6 +146,8 @@ namespace UserInfo
                 {
                     if (axCZKEM1.GetUserTmpExStr(iMachineNumber, sdwEnrollNumber, idwFingerIndex, out iFlag, out sTmpData, out iTmpLength))//get the corresponding templates string and length from the memory
                     {
+                        if (iFlag == 0)
+                            continue;
                         if (bHasFg == true)
                         {
                             bHasFg_tmp = true;
@@ -158,6 +160,7 @@ namespace UserInfo
                         } 
                     }
                 }
+                Array.Clear(sTmpFaceData, 0, sTmpFaceData.Length);
                 iFaceLength = 128 * 1024;//can't be zero
                 if (axCZKEM1.GetUserFace(iMachineNumber, sdwEnrollNumber, iFaceIndex, ref sTmpFaceData[0], ref iFaceLength))
                 {// 'get the face templates from the memory
@@ -679,16 +682,11 @@ namespace UserInfo
                 return "[]";
             }
             string data = "[";
-            //int idwErrorCode = 0;
-            string sdwEnrollNumber = "";
-            string sName = "";
-            string sPassword = "";
-            int iPrivilege = 0;
-            bool bEnabled = false;
+            int idwErrorCode = 0;
             int iFaceIndex = 50;//the only possible parameter value
             int iFaceLength = 128 * 1024; //initialize the length(cannot be zero)
             byte[] sTmpFaceData = new byte[iFaceLength];
-            string sCardnumber = "";
+            
             string S = "";
             string S_tmp = "";//for figer templates
             S = "工号," + "姓名," + "指纹索引," + "指纹序列," + "等级," + "密码," + "使能," + "标记," + "人脸索引," + "人脸序列," + "人脸字节数," + "卡号";
@@ -699,22 +697,26 @@ namespace UserInfo
             bool bHasFg_tmp = false;
             bool bHasFc = false;
             int idwFingerIndex;
-            string sTmpData = "";
-            int iTmpLength = 0;
-            int iFlag = 0;
+            
             int i = 0;
             bool ret = false;
+            //axCZKEM1.EnableDevice(iMachineNumber, false);
             for (i=0; i< users_id.Length; i++)
             {
+                string sdwEnrollNumber = "";
+                string sTmpData = "";
+                int iTmpLength = 0;
+                int iFlag = 0; 
+                Array.Clear(sTmpFaceData, 0, sTmpFaceData.Length);
                 sdwEnrollNumber = users_id[i];
-                //axCZKEM1.EnableDevice(iMachineNumber, false);
-                ret = axCZKEM1.SSR_GetUserInfo(iMachineNumber, sdwEnrollNumber, out sName, out sPassword, out iPrivilege, out bEnabled);
+                
+                ret = axCZKEM1.SSR_GetUserInfo(iMachineNumber, sdwEnrollNumber, out string sName, out string sPassword, out int iPrivilege, out bool bEnabled);
                 if (ret == false)
                 {
                     data += "{},";
                     continue;
                 } 
-                axCZKEM1.GetStrCardNumber(out sCardnumber);
+                axCZKEM1.GetStrCardNumber(out string sCardnumber);
                 data += "{\"UserId\":\"" + sdwEnrollNumber + "\",\"Name\":\"" + sName + "\",\"Cardnumber\":" + sCardnumber;
                 for (idwFingerIndex = 0; idwFingerIndex < 10; idwFingerIndex++)
                 {
@@ -754,6 +756,10 @@ namespace UserInfo
                     //S = S + "," + iFaceIndex + "," + sFaceData + "," + iFaceLength;
                     bHasFc = true;
                 }
+                else
+                {
+                    axCZKEM1.GetLastError( idwErrorCode);
+                }
                 //if (axCZKEM1.GetStrCardNumber(out sCardnumber))
                 {// 'get the card number from the memory
                     if (bHasFg == false && bHasFc == false)
@@ -786,6 +792,7 @@ namespace UserInfo
                 bHasFg = false;
                 bHasFc = false;
             }
+            //axCZKEM1.EnableDevice(iMachineNumber, true);
             if (data.Length > 1)
             {
                 data = data.Substring(0, (data.Length - 1));
@@ -794,7 +801,7 @@ namespace UserInfo
             sw.Close();
             fs.Close();
             return data;
-            //axCZKEM1.EnableDevice(iMachineNumber, true);
+            
         }
         //add by Darcy on Nov.23 2009
         //Add the existed userid to DropDownLists.
