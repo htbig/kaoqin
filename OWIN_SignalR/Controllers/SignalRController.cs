@@ -96,7 +96,7 @@ namespace OWIN_SignalR.Controller
                     for (i = 1; i < total; i++)
                     {
                         WebServer.WebApiApplication.users[i].BtnBatchUpdate_Click("");
-                        process = +10;
+                        process += 10;
                     }
                 }
                 else if (id == 9)
@@ -104,7 +104,7 @@ namespace OWIN_SignalR.Controller
                     for (i = 0; i < total - 1; i++)
                     {
                         WebServer.WebApiApplication.users[i].BtnBatchUpdate_Click("");
-                        process = +10;
+                        process += 10;
                     }
                 }
                 else
@@ -112,12 +112,12 @@ namespace OWIN_SignalR.Controller
                     for (i = 0; i < id - 1; i++)
                     {
                         WebServer.WebApiApplication.users[i].BtnBatchUpdate_Click("");
-                        process = +10;
+                        process += 10;
                     }
                     for (i = id; i < total; i++)
                     {
                         WebServer.WebApiApplication.users[i].BtnBatchUpdate_Click("");
-                        process = +10;
+                        process += 10;
                     }
                 }
                 System.Diagnostics.Debug.WriteLine("upload success");
@@ -201,6 +201,7 @@ namespace OWIN_SignalR.Controller
                 }
                 WebServer.WebApiApplication.users[id - 1].BtnGetUserInfo_Click(user_list);
                 System.Diagnostics.Debug.WriteLine("download user success");
+                partprocess = 10;
                 Thread.Sleep(1000);
                 int total = WebServer.WebApiApplication.users.Length;
 
@@ -209,7 +210,7 @@ namespace OWIN_SignalR.Controller
                     for (i = 1; i < total; i++)
                     {
                         WebServer.WebApiApplication.users[i].BtnBatchUpdate_Click("partuser.csv");
-                        partprocess = +10;
+                        partprocess += 10;
                     }
                 }
                 else if (id == 9)
@@ -217,7 +218,7 @@ namespace OWIN_SignalR.Controller
                     for (i = 0; i < total - 1; i++)
                     {
                         WebServer.WebApiApplication.users[i].BtnBatchUpdate_Click("partuser.csv");
-                        partprocess = +10;
+                        partprocess += 10;
                     }
                 }
                 else
@@ -225,12 +226,12 @@ namespace OWIN_SignalR.Controller
                     for (i = 0; i < id - 1; i++)
                     {
                         WebServer.WebApiApplication.users[i].BtnBatchUpdate_Click("partuser.csv");
-                        partprocess = +10;
+                        partprocess += 10;
                     }
                     for (i = id; i < total; i++)
                     {
                         WebServer.WebApiApplication.users[i].BtnBatchUpdate_Click("partuser.csv");
-                        partprocess = +10;
+                        partprocess += 10;
                     }
                 }   
                 System.Diagnostics.Debug.WriteLine("upload user success");
