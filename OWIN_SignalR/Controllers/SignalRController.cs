@@ -13,6 +13,9 @@ namespace OWIN_SignalR.Controller
 {
     public class SignalRController : ApiController
     {
+        public static readonly log4net.ILog loginfo = log4net.LogManager.GetLogger("loginfo");
+        public static readonly log4net.ILog logerr = log4net.LogManager.GetLogger("logerr");
+            
         static int process = 0;
         static bool syncFlag = false;
         static bool syncPartFlag = false;
@@ -21,7 +24,8 @@ namespace OWIN_SignalR.Controller
         {
             int id = Convert.ToInt32(index);
             WebServer.WebApiApplication.users[id - 1].BtnDownloadUserInfo_Click();
-            System.Diagnostics.Debug.WriteLine("download user info successfull!");
+            //System.Diagnostics.Debug.WriteLine("download user info successfull!");
+            loginfo.InfoFormat("download user info successfull!");
             return 1;
         }
         async Task AsyncGetUserInfo(int index)
@@ -32,6 +36,7 @@ namespace OWIN_SignalR.Controller
         [HttpGet]
         public void GetUserInfo(string id)
         {
+            loginfo.InfoFormat("GetUserInfo id={0}", id);
             if (id == null)
             {
                 id = "2";
@@ -39,7 +44,8 @@ namespace OWIN_SignalR.Controller
             int index = int.Parse(id);
             if (index > WebServer.WebApiApplication.users.Length || index < 1)
             {
-                System.Diagnostics.Debug.WriteLine("has no machine number");
+                //System.Diagnostics.Debug.WriteLine("has no machine number");
+                logerr.Error ("has no machine number");
                 return;
             }
             AsyncGetUserInfo(index);
@@ -49,7 +55,8 @@ namespace OWIN_SignalR.Controller
         {
             int id = Convert.ToInt32(index);
             WebServer.WebApiApplication.users[id - 1].BtnBatchUpdate_Click("");
-            System.Diagnostics.Debug.WriteLine("batchUpLoad user info successfull!");
+            //System.Diagnostics.Debug.WriteLine("batchUpLoad user info successfull!");
+            loginfo.InfoFormat("batchUpLoad user info successfull!");
             return 1;
         }
         async Task AsyncBatchUserInfo(int index)
@@ -60,6 +67,7 @@ namespace OWIN_SignalR.Controller
         [HttpPut]
         public void PutBatchUserInfo(string id)
         {
+            loginfo.InfoFormat("PutBatchUserInfo id={0}", id);
             if (id == null)
             {
                 id = "1";
@@ -67,7 +75,8 @@ namespace OWIN_SignalR.Controller
             int index = int.Parse(id);
             if (index > WebServer.WebApiApplication.users.Length || index < 1)
             {
-                System.Diagnostics.Debug.WriteLine("has no machine number");
+                //System.Diagnostics.Debug.WriteLine("has no machine number");
+                logerr.Error ("has no machine number");
                 return;
             }
             AsyncBatchUserInfo(index);
@@ -76,6 +85,7 @@ namespace OWIN_SignalR.Controller
         [HttpGet]
         public HttpResponseMessage GetSyncStatus()
         {
+            loginfo.InfoFormat("GetSyncStatus process={0}", process);
             return new HttpResponseMessage()
             {
                 Content = new StringContent("{\"code\":0,\"msg\":\"success\",\"output\":{\"process\":"+ process +"}}", Encoding.UTF8, "application/json"),
@@ -90,7 +100,8 @@ namespace OWIN_SignalR.Controller
             {
                 WebServer.WebApiApplication.users[id - 1].BtnDownloadUserInfo_Click();
                 process = 20;
-                System.Diagnostics.Debug.WriteLine("down load success");
+                //System.Diagnostics.Debug.WriteLine("down load success");
+                loginfo.InfoFormat("down load success");
                 if (id == 1)
                 {
                     for (i = 1; i < total; i++)
@@ -120,12 +131,14 @@ namespace OWIN_SignalR.Controller
                         process += 10;
                     }
                 }
-                System.Diagnostics.Debug.WriteLine("upload success");
+                //System.Diagnostics.Debug.WriteLine("upload success");
+                loginfo.InfoFormat("upload success");
                 process = 100;
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine(e.Message);
+                //System.Diagnostics.Debug.WriteLine(e.Message);
+                logerr.Error (e.Message);
             }
             syncFlag = false;
             return 1;
@@ -138,6 +151,7 @@ namespace OWIN_SignalR.Controller
         [HttpPost]
         public HttpResponseMessage Sync(dynamic obj)
         {
+            loginfo.InfoFormat("Sync obj={0}", obj);
             if(syncFlag == true)
             {
                 return new HttpResponseMessage()
@@ -156,7 +170,8 @@ namespace OWIN_SignalR.Controller
                 }
                 if (id > WebServer.WebApiApplication.users.Length)
                 {
-                    System.Diagnostics.Debug.WriteLine("has no machine number");
+                    //System.Diagnostics.Debug.WriteLine("has no machine number");
+                    logerr.Error("has no machine number");
                     return new HttpResponseMessage()
                     {
                         Content = new StringContent("{\"code\":1,\"msg\":\"has no such machine number\",\"output\":[]}", Encoding.UTF8, "application/json"),
@@ -165,7 +180,8 @@ namespace OWIN_SignalR.Controller
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine(e.Message);
+                //System.Diagnostics.Debug.WriteLine(e.Message);
+                logerr.Error(e.Message);
                 return new HttpResponseMessage()
                 {
                     Content = new StringContent("{\"code\":1,\"msg\":\"" + e.Message + "\",\"output\":[]}", Encoding.UTF8, "application/json"),
@@ -182,6 +198,7 @@ namespace OWIN_SignalR.Controller
         [HttpGet]
         public HttpResponseMessage GetSyncPartStatus()
         {
+            loginfo.InfoFormat("GetSyncPartStatus partprocess={0}", partprocess);
             return new HttpResponseMessage()
             {
                 Content = new StringContent("{\"code\":0,\"msg\":\"success\",\"output\":{\"process\":" + partprocess + "}}", Encoding.UTF8, "application/json"),
@@ -200,7 +217,8 @@ namespace OWIN_SignalR.Controller
                     user_list[i] = sArray[i+1];
                 }
                 WebServer.WebApiApplication.users[id - 1].BtnGetUserInfo_Click(user_list);
-                System.Diagnostics.Debug.WriteLine("download user success");
+                //System.Diagnostics.Debug.WriteLine("download user success");
+                loginfo.InfoFormat("download user success");
                 partprocess = 10;
                 Thread.Sleep(1000);
                 int total = WebServer.WebApiApplication.users.Length;
@@ -234,12 +252,14 @@ namespace OWIN_SignalR.Controller
                         partprocess += 10;
                     }
                 }   
-                System.Diagnostics.Debug.WriteLine("upload user success");
+                //System.Diagnostics.Debug.WriteLine("upload user success");
+                loginfo.InfoFormat("upload user success");
                 partprocess = 100;
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine(e.Message);
+                //System.Diagnostics.Debug.WriteLine(e.Message);
+                logerr.Error(e.Message);
             }
             syncPartFlag = false;
             return 1;
@@ -253,6 +273,7 @@ namespace OWIN_SignalR.Controller
         [HttpPost]
         public HttpResponseMessage SyncPart(dynamic obj)
         {
+            loginfo.InfoFormat("SyncPart obj={0}", obj);
             if (syncPartFlag == true)
             {
                 return new HttpResponseMessage()
@@ -269,7 +290,8 @@ namespace OWIN_SignalR.Controller
                 id = Convert.ToInt32(obj.id);  //mathine id 1~9
                 if (obj.user_id_list == null || obj.id == null)
                 {
-                    System.Diagnostics.Debug.WriteLine("need user_id_list and id input parameter");
+                    //System.Diagnostics.Debug.WriteLine("need user_id_list and id input parameter");
+                    logerr.Error("need user_id_list and id input parameter");
                     return new HttpResponseMessage()
                     {
                         Content = new StringContent("{\"code\":1,\"msg\":\"need user_id_list and id input parameter\",\"output\":[]}", Encoding.UTF8, "application/json"),
@@ -277,7 +299,8 @@ namespace OWIN_SignalR.Controller
                 }
                 if (id > WebServer.WebApiApplication.users.Length)
                 {
-                    System.Diagnostics.Debug.WriteLine("has no machine number");
+                    //System.Diagnostics.Debug.WriteLine("has no machine number");
+                    logerr.Error("has no machine number");
                     return new HttpResponseMessage()
                     {
                         Content = new StringContent("{\"code\":1,\"msg\":\"has no such machine number\",\"output\":[]}", Encoding.UTF8, "application/json"),
@@ -286,7 +309,8 @@ namespace OWIN_SignalR.Controller
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine(e.Message);
+                //System.Diagnostics.Debug.WriteLine(e.Message);
+                logerr.Error(e.Message);
                 return new HttpResponseMessage()
                 {
                     Content = new StringContent("{\"code\":1,\"msg\":\"" + e.Message + "\",\"output\":[]}", Encoding.UTF8, "application/json"),
@@ -303,6 +327,7 @@ namespace OWIN_SignalR.Controller
         [HttpPost]
         public HttpResponseMessage AddUser(dynamic obj)
         {
+            loginfo.InfoFormat("AddUser obj={0}", obj);
             try
             {
                 string user_id = Convert.ToString(obj.user_id);
@@ -310,6 +335,7 @@ namespace OWIN_SignalR.Controller
                 string card_number = Convert.ToString(obj.card_number);
                 if (obj.user_id == null || obj.user_name == null || obj.card_number == null)
                 {
+                    logerr.Error("need user_id, user_name, card_number input paremeter");
                     return new HttpResponseMessage()
                     {
                         Content = new StringContent("{\"code\":1,\"msg\":\"need user_id, user_name, card_number input paremeter\",\"output\":[]}", Encoding.UTF8, "application/json"),
@@ -326,7 +352,8 @@ namespace OWIN_SignalR.Controller
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine(e.Message);
+                //System.Diagnostics.Debug.WriteLine(e.Message);
+                logerr.Error(e.Message);
                 return new HttpResponseMessage()
                 {
                     Content = new StringContent("{\"code\":1,\"msg\":\"" + e.Message + "\",\"output\":[]}", Encoding.UTF8, "application/json"),
@@ -337,12 +364,14 @@ namespace OWIN_SignalR.Controller
         [HttpDelete]
         public HttpResponseMessage DeleteUser(dynamic obj)
         {
+            loginfo.InfoFormat("DeleteUser obj={0}", obj);
             try
             {
                 int i = 0;
                 string user_id = Convert.ToString(obj.user_id);
                 if (obj.user_id == null)
                 {
+                    logerr.Error("no userid appoint");
                     return new HttpResponseMessage()
                     {
                         Content = new StringContent("{\"code\":1,\"msg\":\"" + "no userid appoint" + "\",\"output\":[]}", Encoding.UTF8, "application/json"),
@@ -359,7 +388,8 @@ namespace OWIN_SignalR.Controller
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine(e.Message);
+                //System.Diagnostics.Debug.WriteLine(e.Message);
+                logerr.Error(e.Message);
                 return new HttpResponseMessage()
                 {
                     Content = new StringContent("{\"code\":1,\"msg\":\"" + e.Message + "\",\"output\":[]}", Encoding.UTF8, "application/json"),
@@ -369,6 +399,7 @@ namespace OWIN_SignalR.Controller
         [HttpPost]
         public HttpResponseMessage PostUserState(dynamic obj)
         {
+            loginfo.InfoFormat("PostUserState obj={0}", obj);
             int id = 2; //default id is 2:前台
             string user_id_list = "";
             try
@@ -377,7 +408,8 @@ namespace OWIN_SignalR.Controller
                 id = Convert.ToInt32(obj.id);  //mathine id 1~9
                 if (obj.user_id_list == null || obj.id == null)
                 {
-                    System.Diagnostics.Debug.WriteLine("need user_id_list and id input parameter");
+                    //System.Diagnostics.Debug.WriteLine("need user_id_list and id input parameter");
+                    logerr.Error("need user_id_list and id input parameter");
                     return new HttpResponseMessage()
                     {
                         Content = new StringContent("{\"code\":1,\"msg\":\"need user_id_list and id input parameter\",\"output\":[]}", Encoding.UTF8, "application/json"),
@@ -385,7 +417,8 @@ namespace OWIN_SignalR.Controller
                 }
                 if (id > WebServer.WebApiApplication.users.Length)
                 {
-                    System.Diagnostics.Debug.WriteLine("has no machine number");
+                    //System.Diagnostics.Debug.WriteLine("has no machine number");
+                    logerr.Error("has no machine number");
                     return new HttpResponseMessage()
                     {
                         Content = new StringContent("{\"code\":1,\"msg\":\"has no such machine number\",\"output\":[]}", Encoding.UTF8, "application/json"),
@@ -394,7 +427,8 @@ namespace OWIN_SignalR.Controller
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine(e.Message);
+                //System.Diagnostics.Debug.WriteLine(e.Message);
+                logerr.Error(e.Message);
                 return new HttpResponseMessage()
                 {
                     Content = new StringContent("{\"code\":1,\"msg\":\"" + e.Message + "\",\"output\":[]}", Encoding.UTF8, "application/json"),

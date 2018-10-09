@@ -1,18 +1,11 @@
 ﻿/**********************************************************
  * Demo for Standalone SDK.Created by Darcy on Oct.15 2009*
 ***********************************************************/
+using log4net;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.IO;
-using System.Net;
 
 using System.Threading;
-using System.Timers;
-using WebServer;
 namespace UserInfo
 {
     public partial class UserInfoMain
@@ -110,7 +103,9 @@ namespace UserInfo
         {
             if (bIsConnected == false)
             {
-                System.Console.Write("Please connect the device first!", "Error");
+                ILog logerr = log4net.LogManager.GetLogger("loguserinfoerr");
+                //System.Console.Write("Please connect the device first!", "Error");
+                logerr.Error("Please connect the device first!");
                 return;
             }
 
@@ -216,7 +211,9 @@ namespace UserInfo
         {
             if (bIsConnected == false)
             {
-                System.Console.Write("Please connect the device first!", "Error");
+                ILog logerr = log4net.LogManager.GetLogger("loguserinfoerr");
+                //System.Console.Write("Please connect the device first!", "Error");
+                logerr.Error("Please connect the device first!");
                 return;
             }
             int idwErrorCode = 0;
@@ -321,7 +318,9 @@ namespace UserInfo
         {
             if (bIsConnected == false)
             {
-                System.Console.Write("Please connect the device first!"+iMachineNumber.ToString(), "Error");
+                //System.Console.Write("Please connect the device first!"+iMachineNumber.ToString(), "Error");
+                ILog logerr = log4net.LogManager.GetLogger("loguserinfoerr");
+                logerr.Error("Please connect the device first!");
                 return;
             }
             int idwErrorCode = 0;
@@ -442,7 +441,9 @@ namespace UserInfo
         {
             if (bIsConnected == false)
             {
-                System.Console.Write("Please connect the device first!", "Error");
+                //System.Console.Write("Please connect the device first!", "Error");
+                ILog logerr = log4net.LogManager.GetLogger("loguserinfoerr");
+                logerr.Error("Please connect the device first!");
                 return;
             }
             int idwErrorCode = 0;
@@ -678,7 +679,9 @@ namespace UserInfo
         {
             if (bIsConnected == false)
             {
-                System.Console.Write("Please connect the device first!", "Error");
+                //System.Console.Write("Please connect the device first!", "Error");
+                ILog logerr = log4net.LogManager.GetLogger("loguserinfoerr");
+                logerr.Error("Please connect the device first!");
                 return "[]";
             }
             string data = "[";
