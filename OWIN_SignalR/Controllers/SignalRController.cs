@@ -360,7 +360,42 @@ namespace OWIN_SignalR.Controller
                 };
             }
         }
-
+        [HttpPost]
+        public HttpResponseMessage UpdateUser(dynamic obj)
+        {
+            loginfo.InfoFormat("UpdateUser obj={0}", obj);
+            try
+            {
+                string user_id = Convert.ToString(obj.user_id);
+                string user_name = Convert.ToString(obj.user_name);
+                string card_number = Convert.ToString(obj.card_number);
+                if (obj.user_id == null || obj.user_name == null || obj.card_number == null)
+                {
+                    logerr.Error("need user_id, user_name, card_number input paremeter");
+                    return new HttpResponseMessage()
+                    {
+                        Content = new StringContent("{\"code\":1,\"msg\":\"need user_id, user_name, card_number input paremeter\",\"output\":[]}", Encoding.UTF8, "application/json"),
+                    };
+                }
+                for (int i = 0; i < WebServer.WebApiApplication.users.Length; i++)
+                {
+                    WebServer.WebApiApplication.users[i].BtnUpdateUserInfo_Click(user_id, user_name, card_number);
+                }
+                return new HttpResponseMessage()
+                {
+                    Content = new StringContent("{\"code\":0,\"msg\":\"success\",\"output\":[]}", Encoding.UTF8, "application/json"),
+                };
+            }
+            catch (Exception e)
+            {
+                //System.Diagnostics.Debug.WriteLine(e.Message);
+                logerr.Error(e.Message);
+                return new HttpResponseMessage()
+                {
+                    Content = new StringContent("{\"code\":1,\"msg\":\"" + e.Message + "\",\"output\":[]}", Encoding.UTF8, "application/json"),
+                };
+            }
+        }
         [HttpDelete]
         public HttpResponseMessage DeleteUser(dynamic obj)
         {
@@ -441,6 +476,71 @@ namespace OWIN_SignalR.Controller
             {
                 Content = new StringContent("{\"code\":0,\"msg\":\"success\",\"output\":"+data+"}", Encoding.UTF8, "application/json"),
             };
+        }
+        [HttpPost]
+        public HttpResponseMessage RestartDevice(string id)
+        {
+            loginfo.InfoFormat("RestartDevice obj={0}", id);
+            try
+            {
+                if (id == null)
+                {
+                    return new HttpResponseMessage()
+                    {
+                        Content = new StringContent("{\"code\":1,\"msg\":\"" + "no machie id appoint" + "\",\"output\":[]}", Encoding.UTF8, "application/json"),
+                    };
+                }
+                int index = int.Parse(id);
+                if (index > WebServer.WebApiApplication.users.Length || index < 1)
+                {
+                    logerr.Error("has no machine number");
+                    return new HttpResponseMessage()
+                    {
+                        Content = new StringContent("{\"code\":1,\"msg\":\"" + "has no such machine number" + "\",\"output\":[]}", Encoding.UTF8, "application/json"),
+                    };
+                }            
+                WebServer.WebApiApplication.users[index - 1].BtnRestartDevice_Click();
+                loginfo.InfoFormat("restart "+ id + " machie successfull");
+                return new HttpResponseMessage()
+                {
+                    Content = new StringContent("{\"code\":0,\"msg\":\"success\",\"output\":[]}", Encoding.UTF8, "application/json"),
+                };
+            }
+            catch (Exception e)
+            {
+                //System.Diagnostics.Debug.WriteLine(e.Message);
+                logerr.Error(e.Message);
+                return new HttpResponseMessage()
+                {
+                    Content = new StringContent("{\"code\":1,\"msg\":\"" + e.Message + "\",\"output\":[]}", Encoding.UTF8, "application/json"),
+                };
+            }
+        }
+        [HttpPost]
+        public HttpResponseMessage RestartHZDevice()
+        {
+            loginfo.InfoFormat("RestartHZDevice ....");
+            try
+            {
+                for (int i = 1; i < WebServer.WebApiApplication.users.Length; i++)
+                {
+                    WebServer.WebApiApplication.users[i].BtnRestartDevice_Click();
+                    loginfo.InfoFormat("restart " + i + " machie successfull");
+                }                
+                return new HttpResponseMessage()
+                {
+                    Content = new StringContent("{\"code\":0,\"msg\":\"success\",\"output\":[]}", Encoding.UTF8, "application/json"),
+                };
+            }
+            catch (Exception e)
+            {
+                //System.Diagnostics.Debug.WriteLine(e.Message);
+                logerr.Error(e.Message);
+                return new HttpResponseMessage()
+                {
+                    Content = new StringContent("{\"code\":1,\"msg\":\"" + e.Message + "\",\"output\":[]}", Encoding.UTF8, "application/json"),
+                };
+            }
         }
 
     }
