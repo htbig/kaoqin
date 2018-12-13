@@ -347,6 +347,47 @@ namespace UserInfo
             axCZKEM1.RefreshData(iMachineNumber);//the data in the device should be refreshed
             axCZKEM1.EnableDevice(iMachineNumber, true);
         }
+        public void BtnUpdateUserInfo_Click(string user_id, string user_name, string card_number)
+        {
+            if (bIsConnected == false)
+            {
+                //System.Console.Write("Please connect the device first!"+iMachineNumber.ToString(), "Error");
+                ILog logerr = log4net.LogManager.GetLogger("loguserinfoerr");
+                logerr.Error("Please connect the device first!");
+                return;
+            }
+            int idwErrorCode = 0;
+            string sdwEnrollNumber = user_id;
+            string sName = user_name;
+            int iPrivilege = 0;
+            string sPassword = "";
+            bool bEnabled = true;
+
+            axCZKEM1.EnableDevice(iMachineNumber, false);
+            bool ret = axCZKEM1.SSR_GetUserInfo(iMachineNumber, sdwEnrollNumber, out string sLastName, out string sLastPassword, out int iLastPrivilege, out bool bLastEnabled);
+            if (ret == false)
+            {
+                ILog logerr = log4net.LogManager.GetLogger("loguserinfoerr");
+                logerr.Error("no such user: " + sdwEnrollNumber);
+                return;
+            }
+            string hexString = card_number;
+            int num = Int32.Parse(hexString, System.Globalization.NumberStyles.HexNumber);
+            axCZKEM1.SetStrCardNumber(num.ToString()); //Before you using function SetUserInfo,set the card number to make sure you can upload it to the device
+            if (axCZKEM1.SSR_SetUserInfo(iMachineNumber, sdwEnrollNumber, sName, sPassword, iPrivilege, bEnabled))
+            {//upload user information to the device
+                System.Diagnostics.Debug.WriteLine("Successfully Upload user info!!!");
+            }
+            else
+            {
+                axCZKEM1.GetLastError(ref idwErrorCode);
+                System.Diagnostics.Debug.WriteLine("set userinfo failed!!!");
+                axCZKEM1.EnableDevice(iMachineNumber, true);
+                return;
+            }
+            axCZKEM1.RefreshData(iMachineNumber);//the data in the device should be refreshed
+            axCZKEM1.EnableDevice(iMachineNumber, true);
+        }
         //Delete a certain user's fingerprint template of specified index
         //You shuold input the the user id and the fingerprint index you will delete
         //The difference between the two functions "SSR_DelUserTmpExt" and "SSR_DelUserTmp" is that the former supports 24 bits' user id.
@@ -841,6 +882,28 @@ namespace UserInfo
         //        return;
         //    }
         //}
+        //Restart the device 
+        public void BtnRestartDevice_Click()
+        {
+            if (bIsConnected == false)
+            {
+                ILog logerr = log4net.LogManager.GetLogger("loguserinfoerr");
+                logerr.Error("Please connect the device first!");
+                return;
+            }
+            int idwErrorCode = 0;
+           
+            if (axCZKEM1.RestartDevice(iMachineNumber) == true)
+            {
+                System.Diagnostics.Debug.WriteLine("The device will restart!");
+                //MessageBox.Show("The device will restart!", "Success");
+            }
+            else
+            {
+                axCZKEM1.GetLastError(ref idwErrorCode);
+                System.Diagnostics.Debug.WriteLine("Operation failed,ErrorCode=" + idwErrorCode.ToString());
+            }
+        }
         #endregion
     }
 }
